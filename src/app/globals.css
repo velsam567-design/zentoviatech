@@ -1,0 +1,354 @@
+@import "tailwindcss";
+
+/* ==========================================================
+   THEME
+========================================================== */
+
+@theme {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+
+  --color-background: #020617;
+  --color-surface: #0f172a;
+  --color-card: #111827;
+
+  --color-primary: #06b6d4;
+  --color-secondary: #3b82f6;
+
+  --radius-card: 24px;
+}
+
+/* ==========================================================
+   ROOT VARIABLES
+========================================================== */
+
+:root {
+  --background: #020617;
+  --surface: #0f172a;
+  --card: #111827;
+
+  --primary: #06b6d4;
+  --secondary: #3b82f6;
+
+  --text: #ffffff;
+  --text-light: #cbd5e1;
+  --text-muted: #94a3b8;
+
+  --border: rgba(255, 255, 255, 0.08);
+
+  --radius: 24px;
+}
+
+/* ==========================================================
+   RESET
+========================================================== */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* Smooth transitions on interactive properties only — avoids
+   fighting Tailwind and keeps layout-unrelated props fast. */
+* {
+  transition:
+    background-color 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease,
+    opacity 0.25s ease;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+html,
+body {
+  min-height: 100%;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(6, 182, 212, 0.12),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(59, 130, 246, 0.12),
+      transparent 35%
+    ),
+    var(--background);
+
+  color: var(--text);
+
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+
+  text-rendering: optimizeLegibility;
+
+  line-height: 1.6;
+
+  /* Creates a new stacking context — prevents z-index bleed
+     from deeply nested children. */
+  isolation: isolate;
+}
+
+/* ==========================================================
+   ACCESSIBILITY — FOCUS
+========================================================== */
+
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 3px;
+}
+
+/* Remove default focus ring for mouse users */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ==========================================================
+   SELECTION
+========================================================== */
+
+::selection {
+  background: var(--primary);
+  color: white;
+}
+
+/* ==========================================================
+   LINKS
+========================================================== */
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* ==========================================================
+   IMAGES
+========================================================== */
+
+img,
+svg,
+video,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+/* ==========================================================
+   BUTTONS
+========================================================== */
+
+button {
+  cursor: pointer;
+}
+
+/* ==========================================================
+   INPUTS
+========================================================== */
+
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+}
+
+/* ==========================================================
+   SECTION SPACING
+========================================================== */
+
+section {
+  position: relative;
+  padding-block: 6rem;
+}
+
+/* ==========================================================
+   CONTAINER
+========================================================== */
+
+.container-custom {
+  width: min(1280px, calc(100% - 2rem));
+  margin-inline: auto;
+}
+
+/* ==========================================================
+   CARD
+========================================================== */
+
+.card {
+  position: relative;
+  overflow: hidden;
+
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+
+  background: rgba(15, 23, 42, 0.55);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  transition: transform 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  border-color: var(--primary);
+  box-shadow: 0 20px 60px rgba(6, 182, 212, 0.15);
+}
+
+/* ==========================================================
+   GLASS
+========================================================== */
+
+.glass {
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+}
+
+/* ==========================================================
+   GRADIENT TEXT
+========================================================== */
+
+.gradient-text {
+  background: linear-gradient(90deg, #22d3ee, #3b82f6);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ==========================================================
+   GLOW
+========================================================== */
+
+.glow {
+  box-shadow: 0 0 40px rgba(6, 182, 212, 0.18);
+}
+
+/* ==========================================================
+   BUTTONS
+========================================================== */
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: linear-gradient(135deg, #06b6d4, #2563eb);
+  color: white;
+
+  border-radius: 14px;
+  padding: 0.75rem 1.75rem;
+
+  font-weight: 600;
+  font-size: 0.9375rem;
+
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 40px rgba(6, 182, 212, 0.35);
+}
+
+.btn-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: white;
+
+  border-radius: 14px;
+  padding: 0.75rem 1.75rem;
+
+  font-weight: 600;
+  font-size: 0.9375rem;
+
+  transition:
+    border-color 0.3s ease,
+    background 0.3s ease;
+}
+
+.btn-outline:hover {
+  border-color: var(--primary);
+  background: rgba(6, 182, 212, 0.08);
+}
+
+/* ==========================================================
+   SCROLLBAR
+========================================================== */
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #020617;
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(#06b6d4, #3b82f6);
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0891b2;
+}
+
+/* ==========================================================
+   ANIMATION
+========================================================== */
+
+.fade-up {
+  animation: fadeUp 0.8s ease both;
+}
+
+/* GPU-accelerated with translate3d */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 35px, 0);
+  }
+
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+/* ==========================================================
+   REDUCED MOTION
+   Respects users who prefer less animation (accessibility +
+   some epilepsy/vestibular disorder considerations).
+========================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
