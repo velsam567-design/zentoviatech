@@ -1,0 +1,647 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id                String            @id @default(cuid())
+  name              String
+  email             String            @unique
+  passwordHash      String
+  phone             String?
+  avatarUrl         String?
+  status            UserStatus        @default(ACTIVE)
+  lastLoginAt       DateTime?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  refreshTokenHash  String?
+  auditLogs         AuditLog[]
+  blogPosts         BlogPost[]
+  enquiries         Enquiry[]
+  enquiryActivities EnquiryActivity[]
+  medias            Media[]
+  notifications     Notification[]
+  roles             UserRole[]
+
+  @@index([status])
+  @@index([createdAt])
+}
+
+model Role {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  description String?
+  isSystem    Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  permissions RolePermission[]
+  users       UserRole[]
+}
+
+model Permission {
+  id          String           @id @default(cuid())
+  name        String           @unique
+  description String?
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  roles       RolePermission[]
+}
+
+model UserRole {
+  id        String   @id @default(cuid())
+  userId    String
+  roleId    String
+  createdAt DateTime @default(now())
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, roleId])
+  @@index([userId])
+  @@index([roleId])
+}
+
+model RolePermission {
+  id           String     @id @default(cuid())
+  roleId       String
+  permissionId String
+  createdAt    DateTime   @default(now())
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  role         Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+  @@index([roleId])
+  @@index([permissionId])
+}
+
+model Service {
+  id               String        @id @default(cuid())
+  name             String
+  slug             String        @unique
+  shortDescription String?
+  description      String?
+  icon             String?
+  imageUrl         String?
+  status           ContentStatus @default(DRAFT)
+  sortOrder        Int           @default(0)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  solutions        Solution[]
+
+  @@index([status])
+  @@index([sortOrder])
+}
+
+model Solution {
+  id               String        @id @default(cuid())
+  serviceId        String?
+  name             String
+  slug             String        @unique
+  shortDescription String?
+  description      String?
+  icon             String?
+  imageUrl         String?
+  status           ContentStatus @default(DRAFT)
+  sortOrder        Int           @default(0)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  service          Service?      @relation(fields: [serviceId], references: [id])
+
+  @@index([serviceId])
+  @@index([status])
+  @@index([sortOrder])
+}
+
+model Industry {
+  id               String        @id @default(cuid())
+  name             String
+  slug             String        @unique
+  shortDescription String?
+  description      String?
+  icon             String?
+  imageUrl         String?
+  status           ContentStatus @default(DRAFT)
+  sortOrder        Int           @default(0)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+  caseStudies      CaseStudy[]
+  projects         Project[]
+  testimonials     Testimonial[]
+
+  @@index([status])
+  @@index([sortOrder])
+}
+
+model Technology {
+  id                  String              @id @default(cuid())
+  name                String
+  slug                String              @unique
+  category            String?
+  description         String?
+  iconUrl             String?
+  websiteUrl          String?
+  status              ContentStatus       @default(DRAFT)
+  sortOrder           Int                 @default(0)
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+  productTechnologies ProductTechnology[]
+  projects            ProjectTechnology[]
+
+  @@index([status])
+  @@index([category])
+  @@index([sortOrder])
+}
+
+model Project {
+  id               String              @id @default(cuid())
+  industryId       String?
+  name             String
+  slug             String              @unique
+  tagline          String?
+  shortDescription String?
+  description      String?
+  clientName       String?
+  projectUrl       String?
+  thumbnailUrl     String?
+  featured         Boolean             @default(false)
+  status           ContentStatus       @default(DRAFT)
+  sortOrder        Int                 @default(0)
+  completedAt      DateTime?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  caseStudies      CaseStudy[]
+  industry         Industry?           @relation(fields: [industryId], references: [id])
+  images           ProjectImage[]
+  technologies     ProjectTechnology[]
+  testimonials     Testimonial[]
+
+  @@index([industryId])
+  @@index([status])
+  @@index([featured])
+  @@index([sortOrder])
+  @@index([completedAt])
+}
+
+model ProjectTechnology {
+  id           String     @id @default(cuid())
+  projectId    String
+  technologyId String
+  sortOrder    Int        @default(0)
+  createdAt    DateTime   @default(now())
+  project      Project    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  technology   Technology @relation(fields: [technologyId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, technologyId])
+  @@index([projectId])
+  @@index([technologyId])
+  @@index([sortOrder])
+}
+
+model ProjectImage {
+  id        String   @id @default(cuid())
+  projectId String
+  imageUrl  String
+  altText   String?
+  caption   String?
+  sortOrder Int      @default(0)
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([projectId])
+  @@index([sortOrder])
+  @@index([isPrimary])
+}
+
+model Enquiry {
+  id           String            @id @default(cuid())
+  name         String
+  email        String
+  phone        String?
+  company      String?
+  service      String?
+  solution     String?
+  budget       String?
+  message      String?
+  source       EnquirySource     @default(WEBSITE)
+  status       EnquiryStatus     @default(NEW)
+  priority     EnquiryPriority   @default(MEDIUM)
+  assignedToId String?
+  notes        String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  contactedAt  DateTime?
+  closedAt     DateTime?
+  assignedTo   User?             @relation(fields: [assignedToId], references: [id])
+  activities   EnquiryActivity[]
+
+  @@index([status])
+  @@index([priority])
+  @@index([source])
+  @@index([assignedToId])
+  @@index([createdAt])
+  @@index([email])
+}
+
+model EnquiryActivity {
+  id        String   @id @default(cuid())
+  enquiryId String
+  userId    String?
+  type      String
+  message   String
+  metadata  Json?
+  createdAt DateTime @default(now())
+  enquiry   Enquiry  @relation(fields: [enquiryId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id])
+
+  @@index([enquiryId])
+  @@index([userId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model SiteSetting {
+  id          String      @id @default(cuid())
+  key         String      @unique
+  value       String?
+  type        SettingType @default(TEXT)
+  category    String?
+  description String?
+  isPublic    Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([category])
+  @@index([isPublic])
+}
+
+model SeoMetadata {
+  id                 String     @id @default(cuid())
+  pageType           String
+  pageSlug           String?
+  title              String?
+  metaDescription    String?
+  keywords           String?
+  canonicalUrl       String?
+  ogTitle            String?
+  ogDescription      String?
+  ogImageUrl         String?
+  twitterTitle       String?
+  twitterDescription String?
+  twitterImageUrl    String?
+  robots             String?
+  schemaJson         Json?
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+  blogPosts          BlogPost[]
+
+  @@unique([pageType, pageSlug])
+  @@index([pageType])
+  @@index([pageSlug])
+}
+
+model Media {
+  id           String    @id @default(cuid())
+  name         String
+  fileName     String
+  url          String
+  thumbnailUrl String?
+  type         MediaType @default(IMAGE)
+  mimeType     String?
+  size         Int?
+  width        Int?
+  height       Int?
+  altText      String?
+  caption      String?
+  folder       String?
+  storageKey   String?
+  provider     String?
+  uploadedById String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  uploadedBy   User?     @relation(fields: [uploadedById], references: [id])
+
+  @@index([type])
+  @@index([folder])
+  @@index([uploadedById])
+  @@index([createdAt])
+}
+
+model BlogCategory {
+  id          String        @id @default(cuid())
+  name        String
+  slug        String        @unique
+  description String?
+  status      ContentStatus @default(DRAFT)
+  sortOrder   Int           @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  posts       BlogPost[]
+
+  @@index([status])
+  @@index([sortOrder])
+}
+
+model BlogPost {
+  id            String        @id @default(cuid())
+  categoryId    String?
+  authorId      String?
+  title         String
+  slug          String        @unique
+  excerpt       String?
+  content       String
+  coverImageUrl String?
+  authorName    String?
+  readingTime   Int?
+  featured      Boolean       @default(false)
+  status        ContentStatus @default(DRAFT)
+  publishedAt   DateTime?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  seoMetadataId String?
+  author        User?         @relation(fields: [authorId], references: [id])
+  category      BlogCategory? @relation(fields: [categoryId], references: [id])
+  seo           SeoMetadata?  @relation(fields: [seoMetadataId], references: [id])
+
+  @@index([categoryId])
+  @@index([authorId])
+  @@index([status])
+  @@index([featured])
+  @@index([publishedAt])
+}
+
+model CaseStudy {
+  id             String            @id @default(cuid())
+  projectId      String?
+  industryId     String?
+  title          String
+  slug           String            @unique
+  clientName     String?
+  tagline        String?
+  overview       String?
+  challenge      String?
+  solution       String?
+  implementation String?
+  results        String?
+  coverImageUrl  String?
+  featured       Boolean           @default(false)
+  status         ContentStatus     @default(DRAFT)
+  publishedAt    DateTime?
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  industry       Industry?         @relation(fields: [industryId], references: [id])
+  project        Project?          @relation(fields: [projectId], references: [id])
+  metrics        CaseStudyMetric[]
+
+  @@index([projectId])
+  @@index([industryId])
+  @@index([status])
+  @@index([featured])
+  @@index([publishedAt])
+}
+
+model CaseStudyMetric {
+  id          String    @id @default(cuid())
+  caseStudyId String
+  label       String
+  value       String
+  description String?
+  sortOrder   Int       @default(0)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  caseStudy   CaseStudy @relation(fields: [caseStudyId], references: [id], onDelete: Cascade)
+
+  @@index([caseStudyId])
+  @@index([sortOrder])
+}
+
+model ProductCategory {
+  id          String        @id @default(cuid())
+  name        String
+  slug        String        @unique
+  description String?
+  icon        String?
+  status      ContentStatus @default(DRAFT)
+  sortOrder   Int           @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  products    Product[]
+
+  @@index([status])
+  @@index([sortOrder])
+}
+
+model Product {
+  id               String              @id @default(cuid())
+  categoryId       String?
+  name             String
+  slug             String              @unique
+  tagline          String?
+  shortDescription String?
+  description      String?
+  logoUrl          String?
+  thumbnailUrl     String?
+  demoUrl          String?
+  websiteUrl       String?
+  githubUrl        String?
+  featured         Boolean             @default(false)
+  status           ContentStatus       @default(DRAFT)
+  sortOrder        Int                 @default(0)
+  publishedAt      DateTime?
+  createdAt        DateTime            @default(now())
+  updatedAt        DateTime            @updatedAt
+  category         ProductCategory?    @relation(fields: [categoryId], references: [id])
+  features         ProductFeature[]
+  images           ProductImage[]
+  technologies     ProductTechnology[]
+
+  @@index([categoryId])
+  @@index([status])
+  @@index([featured])
+  @@index([sortOrder])
+  @@index([publishedAt])
+}
+
+model ProductFeature {
+  id          String   @id @default(cuid())
+  productId   String
+  title       String
+  description String?
+  icon        String?
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([sortOrder])
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  imageUrl  String
+  altText   String?
+  caption   String?
+  sortOrder Int      @default(0)
+  isPrimary Boolean  @default(false)
+  createdAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([sortOrder])
+  @@index([isPrimary])
+}
+
+model ProductTechnology {
+  id           String     @id @default(cuid())
+  productId    String
+  technologyId String
+  sortOrder    Int        @default(0)
+  createdAt    DateTime   @default(now())
+  product      Product    @relation(fields: [productId], references: [id], onDelete: Cascade)
+  technology   Technology @relation(fields: [technologyId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, technologyId])
+  @@index([productId])
+  @@index([technologyId])
+  @@index([sortOrder])
+}
+
+model Testimonial {
+  id              String        @id @default(cuid())
+  projectId       String?
+  industryId      String?
+  customerName    String
+  companyName     String?
+  designation     String?
+  content         String
+  profileImageUrl String?
+  rating          Int?
+  featured        Boolean       @default(false)
+  status          ContentStatus @default(DRAFT)
+  sortOrder       Int           @default(0)
+  publishedAt     DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  industry        Industry?     @relation(fields: [industryId], references: [id])
+  project         Project?      @relation(fields: [projectId], references: [id])
+
+  @@index([projectId])
+  @@index([industryId])
+  @@index([status])
+  @@index([featured])
+  @@index([sortOrder])
+  @@index([publishedAt])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String?
+  title     String
+  message   String
+  type      NotificationType @default(INFO)
+  isRead    Boolean          @default(false)
+  actionUrl String?
+  metadata  Json?
+  createdAt DateTime         @default(now())
+  readAt    DateTime?
+  user      User?            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([type])
+  @@index([createdAt])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String?
+  action      String
+  entity      String
+  entityId    String?
+  description String?
+  beforeData  Json?
+  afterData   Json?
+  ipAddress   String?
+  userAgent   String?
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  user        User?    @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([action])
+  @@index([entity])
+  @@index([entityId])
+  @@index([createdAt])
+}
+
+enum UserStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+}
+
+enum ContentStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum EnquiryStatus {
+  NEW
+  CONTACTED
+  QUALIFIED
+  PROPOSAL_SENT
+  NEGOTIATION
+  WON
+  LOST
+  CLOSED
+}
+
+enum EnquiryPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum EnquirySource {
+  WEBSITE
+  CONTACT_FORM
+  PROJECT_BUILDER
+  WHATSAPP
+  INSTAGRAM
+  FACEBOOK
+  LINKEDIN
+  YOUTUBE
+  REFERRAL
+  DIRECT
+  OTHER
+}
+
+enum SettingType {
+  TEXT
+  NUMBER
+  BOOLEAN
+  JSON
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+  DOCUMENT
+  OTHER
+}
+
+enum NotificationType {
+  INFO
+  SUCCESS
+  WARNING
+  ERROR
+  ENQUIRY
+  SYSTEM
+}
