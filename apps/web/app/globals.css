@@ -539,3 +539,11 @@ a {
   }
 }
 
+
+/* Reveal fix: no fade-out flash on mount, smooth fade-in on reveal */
+@media (prefers-reduced-motion: no-preference) {
+  .zt-reveal-pending { transition: none; }
+  .zt-reveal-visible {
+    transition: opacity 800ms cubic-bezier(.22,1,.36,1), transform 800ms cubic-bezier(.22,1,.36,1), filter 800ms cubic-bezier(.22,1,.36,1);
+  }
+}
